@@ -27,6 +27,26 @@ macro_rules! unit {
                 write!(fmt, "{} {}", self.0, $unit)
             }
         }
+
+        impl std::ops::AddAssign<$type> for $type {
+            fn add_assign(&mut self, other: $type) {
+                self.0 += other.0;
+            }
+        }
+
+        impl std::ops::Sub<$type> for $type {
+            type Output = Self;
+            fn sub(self, other: $type) -> Self::Output {
+                Self(self.0 - other.0)
+            }
+        }
+
+        impl std::ops::Neg for $type {
+            type Output = Self;
+            fn neg(self) -> Self {
+                Self(-self.0)
+            }
+        }
         impl Copy for $type {}
         impl Clone for $type {
             fn clone(&self) -> Self {

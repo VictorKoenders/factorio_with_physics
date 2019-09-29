@@ -1,8 +1,9 @@
 use super::{GridStorage, Position};
+use noisy_float::prelude::r32;
 use specs::world::{EntitiesRes, Entity, Index};
 
 pub struct EntityPositionIterator<'a> {
-    starting_position: (usize, usize),
+    starting_position: Position,
     offsets: &'static [(isize, isize)],
     grid: &'a GridStorage,
     entities: &'a EntitiesRes,
@@ -11,7 +12,7 @@ pub struct EntityPositionIterator<'a> {
 
 impl<'a> EntityPositionIterator<'a> {
     pub fn new(
-        starting_position: (usize, usize),
+        starting_position: Position,
         grid: &'a GridStorage,
         entities: &'a EntitiesRes,
         offsets: &'static [(isize, isize)],
@@ -56,10 +57,16 @@ impl<'a> Iterator for EntityPositionIterator<'a> {
                 let (x, y) = self.offsets[0];
                 self.offsets = &self.offsets[1..];
 
-                let x = (x + self.starting_position.0 as isize).max(0) as usize;
-                let y = (y + self.starting_position.0 as isize).max(0) as usize;
+                let position = Position {
+                    x: r32(x as f32) + self.starting_position.x,
+                    y: r32(y as f32) + self.starting_position.x,
+                };
 
-                let indices = self.grid.get_indices_by_position(x, y);
+                if !self.grid.is_in_bounds(position) {
+                    continue;
+                }
+
+                let indices = self.grid.get_indices_on_tile(position);
                 if !indices.is_empty() {
                     self.current_tile_remaining = indices;
                     continue 'outer;

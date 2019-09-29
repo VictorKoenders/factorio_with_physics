@@ -40,13 +40,19 @@ macros::conversion!(Meter / SecondsSquared => MeterPerSecondSquared);
 pub const GRAVITY: MeterPerSecondSquared =
     MeterPerSecondSquared(unsafe { R32::const_unchecked_new(9.82) });
 
+/// Heat capacity, at J/K
 pub struct HeatCapacity(pub R32);
 macros::unit!(HeatCapacity: "J/K");
 macros::conversion!(Joule / Kelvin => HeatCapacity);
+macros::conversion!(HeatCapacity * Kelvin => Joule);
+macros::conversion!(Joule / HeatCapacity => Kelvin);
 
+/// Specific heat capacity, at J/(K KG)
 pub struct SpecificHeatCapacity(pub R32);
 macros::unit!(SpecificHeatCapacity: "J/(K Kg)");
 macros::conversion!(HeatCapacity * Kilogram => SpecificHeatCapacity);
+macros::conversion!(SpecificHeatCapacity * Kilogram => HeatCapacity);
+macros::conversion!(SpecificHeatCapacity * Kelvin => HeatCapacity);
 
 impl SpecificHeatCapacity {
     pub fn geometric_mean(self, other: SpecificHeatCapacity) -> SpecificHeatCapacity {
@@ -55,4 +61,19 @@ impl SpecificHeatCapacity {
 }
 
 pub struct ThermalConductivity(pub R32);
-macros::unit!(ThermalConductivity: "W/K");
+macros::unit!(ThermalConductivity: "(J/(m*s))/K");
+macros::conversion!(ThermalConductivity * Kelvin => JoulesPerMeterSecond);
+
+impl ThermalConductivity {
+    pub fn geometric_mean(self, other: ThermalConductivity) -> ThermalConductivity {
+        ThermalConductivity((self.0 * other.0).sqrt())
+    }
+}
+
+pub struct JoulesPerMeterSecond(pub R32);
+macros::unit!(JoulesPerMeterSecond: "J/(m*s)");
+macros::conversion!(JoulesPerMeterSecond / Meter => JoulesPerSecond);
+
+pub struct JoulesPerSecond(pub R32);
+macros::unit!(JoulesPerSecond: "J/s");
+macros::conversion!(JoulesPerSecond * Seconds => Joule);

@@ -10,12 +10,3 @@ pub struct Position {
 impl specs::Component for Position {
     type Storage = GridStorage;
 }
-
-impl Position {
-    pub fn floor_usize(self) -> (usize, usize) {
-        let (x, y) = (self.x.floor().raw() as isize, self.y.floor().raw() as isize);
-        let x = x.max(0) as usize;
-        let y = y.max(0) as usize;
-        (x, y)
-    }
-}

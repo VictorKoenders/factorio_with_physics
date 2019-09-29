@@ -6,6 +6,7 @@ pub use self::ext::GridStorageExt;
 pub use self::iterator::EntityPositionIterator;
 pub use self::position::Position;
 
+use noisy_float::prelude::Float;
 use specs::hibitset::BitSetLike;
 use specs::storage::{FlaggedStorage, UnprotectedStorage};
 use specs::world::Index;
@@ -35,7 +36,7 @@ impl GridStorage {
     pub fn with_size(width: usize, height: usize) -> Self {
         GridStorage {
             inner: FlaggedStorage::default(),
-            entities: Vec::with_capacity(width * height),
+            entities: vec![Vec::new(); width * height],
             width,
             height,
         }
@@ -46,18 +47,38 @@ impl GridStorage {
         *self.inner.get(index)
     }
 
-    pub(self) fn get_indices_by_position(&self, x: usize, y: usize) -> &[Index] {
-        if x >= self.width || y >= self.height {
-            return &[];
-        }
+    pub(self) fn get_indices_on_tile(&self, position: Position) -> &[Index] {
+        let index = self.position_to_index(position);
+
+        // This is safe because self.position_to_index should always return a valid index.
+        // In release mode this could cause UB, but we assume this has been properly tested in debug
+        unsafe { self.entities.get_unchecked(index) }
+    }
+
+    pub(self) fn is_in_bounds(&self, position: Position) -> bool {
+        !(position.x < 0.0
+            || position.y < 0.0
+            || position.x > (self.width - 1) as f32
+            || position.y > (self.height - 1) as f32)
+    }
+
+    pub(self) fn position_to_index(&self, position: Position) -> usize {
+        let (x, y) = (
+            position.x.floor().raw() as isize,
+            position.y.floor().raw() as isize,
+        );
+        let x = x.max(0).min((self.width as isize) - 1) as usize;
+        let y = y.max(0).min((self.height as isize) - 1) as usize;
+
         let arr_index = y * self.width + x;
         if cfg!(debug_assertions) && self.entities.len() <= arr_index {
-            panic!("Tried to get an x/y that was not in range of the current grid");
+            panic!(
+                "Tried to get an x/y that was not in range of the current grid (requested {}/{})",
+                x, y
+            );
         }
 
-        // This is safe because of the cfg check above
-        // In release mode this could cause UB, but we assume this has been properly tested in debug
-        unsafe { self.entities.get_unchecked(arr_index) }
+        arr_index
     }
 }
 
@@ -70,7 +91,8 @@ impl UnprotectedStorage<Position> for GridStorage {
     }
 
     unsafe fn get(&self, id: specs::world::Index) -> &Position {
-        self.inner.get(id)
+        let result = self.inner.get(id);
+        result
     }
 
     unsafe fn get_mut(&mut self, id: specs::world::Index) -> &mut Position {
@@ -79,6 +101,9 @@ impl UnprotectedStorage<Position> for GridStorage {
 
     unsafe fn insert(&mut self, id: Index, v: Position) {
         self.inner.insert(id, v);
+
+        let index = self.position_to_index(v);
+        self.entities[index].push(id);
     }
 
     unsafe fn remove(&mut self, id: Index) -> Position {

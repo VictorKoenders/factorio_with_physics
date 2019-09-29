@@ -10,9 +10,20 @@ pub struct Steel;
 
 impl Material for Steel {
     fn specific_heat_capacity() -> SpecificHeatCapacity {
-        SpecificHeatCapacity(r32(502.416))
+        SpecificHeatCapacity(r32(490.0))
     }
     fn thermal_conductivity() -> ThermalConductivity {
-        ThermalConductivity(r32(0.0))
+        ThermalConductivity(r32(54.0))
+    }
+}
+
+pub struct Water;
+
+impl Material for Water {
+    fn specific_heat_capacity() -> SpecificHeatCapacity {
+        SpecificHeatCapacity(r32(4179.0))
+    }
+    fn thermal_conductivity() -> ThermalConductivity {
+        ThermalConductivity(r32(0.609))
     }
 }

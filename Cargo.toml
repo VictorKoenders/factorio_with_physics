@@ -7,5 +7,8 @@ version = "0.1.0"
 [dependencies]
 noisy_float = { path = "libs/noisy_float-rs" }
 itertools = "0.8"
-specs = "0.15"
 macros = { path = "libs/macros" }
+
+[dependencies.specs]
+version = "0.15"
+features = ["nightly"]
