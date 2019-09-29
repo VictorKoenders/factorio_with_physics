@@ -1,0 +1,54 @@
+I'm making a game which involves heat and heat management.
+
+Units:
+- J: Joules
+- m: Meter
+- s: Seconds
+- kg: Kilogram
+- K: Kelvin
+
+Because this is a game, it is assumed that all materials have a dimension of 1m x 1m x 1m. Even if a material is only 1g, it can only occupy 1 tile, so it will have a dimension of 1m x 1m x 1m.
+In addition. There is no distance between the materials, and they have a uniform temperature.
+
+In this scenario, there is a cube of hot steel located next to a cube of cold water.
+
+Properties:
+
+Material		Steel	
+Heat capacity		490	(J/kg)/K
+Thermal conductivity	54	(J/(m*s))/K
+Temperature		700	K
+Mass			1000	kg
+
+Material		Water	
+Heat capacity		4179	(J/kg)/K
+Thermal conductivity	0.609	(J/(m*s))/K
+Temperature		300	K
+Mass			1000	kg
+
+
+Given the above values, the block of steel has a potential energy of 490*700*1000 = 343 000 000 J
+The block of water has a potential energy of 4179*300*1000 = 1 253 700 000 J
+
+The two blocks are next to each other. I'm assuming I can take the geometric mean of the thermal conductivity of both the materials:
+Geometric mean of thermal conductivity (GMoTC): sqrt(54*0.609) = 5.734 (J/(m*s))/K
+
+The distance is 1m.
+
+For steel:
+- The temperature difference (Tdiff) is -400K
+- The heat transfer per second is:
+  - GMoTC * Tdiff / distance
+  - = 5.734 (J/(m*s))/K * -400K / 1m
+  - = -2294 J/s
+
+For water:
+- The temperature difference (Tdiff) is 400K
+- The heat transfer per second is:
+  - GMoTC * Tdiff / distance
+  - = 5.734 (J/(m*s))/K * 400K / 1m
+  - = 2294 J/s
+
+This means that after 1 second (ignoring that Tdiff changes over time):
+- The temperature of the block of steel will have dropped by 2294J, or (J / Heat capacity / mass => 2294/490/1000) 0.0047K
+- The temperature of the block of water will have raised by 2294J, or (J / Heat capacity / mass => 2294/4179/1000) 0.0005K
