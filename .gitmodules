@@ -1,3 +1,3 @@
 [submodule "libs/noisy_float-rs"]
 	path = libs/noisy_float-rs
-	url = git@github.com:VictorKoenders/noisy_float-rs
+	url = https://github.com/VictorKoenders/noisy_float-rs
