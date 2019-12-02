@@ -14,6 +14,7 @@ use crate::material::{Steel, Water};
 use crate::units::Kelvin;
 use noisy_float::types::r32;
 use specs::prelude::*;
+use vulkano::instance::{Instance, InstanceExtensions, PhysicalDevice};
 
 pub use crate::grid_storage::*;
 
@@ -55,7 +56,17 @@ fn main() {
         .with(crate::system::HeatSystem, "heat system", &[])
         .build();
 
-    for _ in 0..10 {
+    let instance =
+        Instance::new(None, &InstanceExtensions::none(), None).expect("failed to create instance");
+
+    for device in PhysicalDevice::enumerate(&instance) {
+        println!("Found device {} ({:?})", device.name(), device.ty());
+    }
+    let _physical = PhysicalDevice::enumerate(&instance)
+        .next()
+        .expect("no device available");
+
+    for _ in 0..3 {
         println!("Tick!");
         world.insert(DeltaTime::tick());
         dispatcher.dispatch(&world);

@@ -8,6 +8,7 @@ version = "0.1.0"
 noisy_float = { path = "libs/noisy_float-rs" }
 itertools = "0.8"
 macros = { path = "libs/macros" }
+vulkano = "0.16"
 
 [dependencies.specs]
 version = "0.15"

@@ -91,8 +91,7 @@ impl UnprotectedStorage<Position> for GridStorage {
     }
 
     unsafe fn get(&self, id: specs::world::Index) -> &Position {
-        let result = self.inner.get(id);
-        result
+        self.inner.get(id)
     }
 
     unsafe fn get_mut(&mut self, id: specs::world::Index) -> &mut Position {

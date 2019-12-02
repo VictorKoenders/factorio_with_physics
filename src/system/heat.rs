@@ -33,7 +33,7 @@ impl<'a> System<'a> for HeatSystem {
         for (mass, heat, position, entity) in
             (&mass_storage, &heat_storage, &grid_storage, &entities).join()
         {
-            if (position.x + position.y) % 2.0 == 1.0 {
+            if ((position.x + position.y) % 2.0 - 1.0).raw().abs() < std::f32::EPSILON {
                 // we only update the even tiles, the odd tiles will automatically be updated because they're neighbours of the even tiles
                 continue;
             }
