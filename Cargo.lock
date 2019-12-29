@@ -153,7 +153,7 @@ version = "0.1.0"
 dependencies = [
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "macros 0.1.0",
- "noisy_float 0.1.11",
+ "noisy_float 0.1.12",
  "sdl2 0.32.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "specs 0.15.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -254,7 +254,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "noisy_float"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "num-traits 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
