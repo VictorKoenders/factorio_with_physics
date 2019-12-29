@@ -6,17 +6,18 @@ use specs::prelude::*;
 
 const HEAT_EQUATION_DISTANCE: Meter = Meter(unsafe { R32::const_unchecked_new(0.0001) });
 
+type HeatSystemData<'a> = (
+    ReadStorage<'a, Mass>,
+    WriteStorage<'a, Heat>,
+    WriteStorage<'a, StateChangeRequired>,
+    ReadStorage<'a, Position>,
+    Entities<'a>,
+    ReadExpect<'a, DeltaTime>,
+);
 pub struct HeatSystem;
 
 impl<'a> System<'a> for HeatSystem {
-    type SystemData = (
-        ReadStorage<'a, Mass>,
-        WriteStorage<'a, Heat>,
-        WriteStorage<'a, StateChangeRequired>,
-        ReadStorage<'a, Position>,
-        Entities<'a>,
-        ReadExpect<'a, DeltaTime>,
-    );
+    type SystemData = HeatSystemData<'a>;
 
     fn run(
         &mut self,
