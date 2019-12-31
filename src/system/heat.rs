@@ -4,7 +4,7 @@ use crate::{GridStorageExt, Position};
 use noisy_float::types::{r32, R32};
 use specs::prelude::*;
 
-const HEAT_EQUATION_DISTANCE: Meter = Meter(unsafe { R32::const_unchecked_new(0.0001) });
+const HEAT_EQUATION_DISTANCE: Meter = Meter(unsafe { R32::const_unchecked_new(0.000_01) });
 
 type HeatSystemData<'a> = (
     ReadStorage<'a, Mass>,
@@ -75,6 +75,9 @@ impl JoulesList {
     }
     pub fn add(&mut self, entity: Entity, joules: Joule) {
         let index = entity.id() as usize;
+        if joules.0.raw() <= std::f32::EPSILON {
+            return;
+        }
         if self.entities.len() <= index {
             self.entities.reserve(index - self.entities.len());
             while self.entities.len() <= index {
@@ -86,9 +89,8 @@ impl JoulesList {
 
     pub fn apply(self, storage: &mut WriteStorage<Heat>, entities: &Entities) {
         for (entity, heat) in (entities, storage).join() {
-            let joules = self.entities[entity.id() as usize];
-            if joules.0 != 0.0 {
-                heat.joules += joules;
+            if let Some(joules) = self.entities.get(entity.id() as usize) {
+                heat.joules += *joules;
             }
         }
     }

@@ -44,11 +44,8 @@ impl DeltaTime {
 pub struct MaterialColor(pub Color);
 
 impl MaterialColor {
-    pub fn steel() -> MaterialColor {
-        MaterialColor(Color::RGB(70, 130, 180))
-    }
-    pub fn water() -> MaterialColor {
-        MaterialColor(Color::RGB(235, 244, 250))
+    pub fn rgb(r: u8, g: u8, b: u8) -> Self {
+        Self(Color::rgb(r, g, b))
     }
 }
 

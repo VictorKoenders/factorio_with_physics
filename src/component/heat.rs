@@ -14,15 +14,24 @@ impl Component for Heat {
 }
 
 impl Heat {
-    pub fn from_material<M: Material>(temp: Kelvin, mass: Kilogram) -> Self {
-        let capacity = M::specific_heat_capacity();
-        let conductivity = M::thermal_conductivity();
-        let joules: Joule = capacity * mass * temp;
+    pub fn from_material_specs(
+        temp: Kelvin,
+        mass: Kilogram,
+        specific_heat_capacity: SpecificHeatCapacity,
+        thermal_conductivity: ThermalConductivity,
+    ) -> Self {
+        let joules: Joule = specific_heat_capacity * mass * temp;
         Heat {
-            capacity,
-            conductivity,
+            capacity: specific_heat_capacity,
+            conductivity: thermal_conductivity,
             joules,
         }
+    }
+
+    pub fn from_material<M: Material>(mat: M, temp: Kelvin, mass: Kilogram) -> Self {
+        let capacity = mat.specific_heat_capacity();
+        let conductivity = mat.thermal_conductivity();
+        Self::from_material_specs(temp, mass, capacity, conductivity)
     }
 
     pub fn temperature(self, mass: Kilogram) -> Kelvin {

@@ -3,7 +3,7 @@
 pub struct Color(sdl2::pixels::Color);
 
 impl Color {
-    pub fn RGB(r: u8, g: u8, b: u8) -> Self {
+    pub fn rgb(r: u8, g: u8, b: u8) -> Self {
         Self(sdl2::pixels::Color::RGB(r, g, b))
     }
 
