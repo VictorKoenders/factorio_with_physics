@@ -5,6 +5,12 @@ use std::{
     net::TcpStream,
 };
 
+pub extern crate uuid;
+pub extern crate serde;
+
+mod ids;
+pub use self::ids::*;
+
 pub mod to_server;
 pub use self::to_server::ClientToServer;
 
@@ -67,19 +73,24 @@ impl<T: DeserializeOwned> Receiver<T> {
     }
 }
 
-pub fn encode_into<E: Serialize>(e: E, writer: &mut dyn Write) {
-    use byteorder::{ByteOrder, NetworkEndian, WriteBytesExt};
+pub fn encode_into<E: Serialize>(e: E, writer: &mut dyn Write) -> Result<(), ()> {
+    use byteorder::{NetworkEndian, WriteBytesExt};
 
-    let bytes = bincode::serialize(&e).unwrap();
+    let bytes = bincode::serialize(&e).map_err(|_| ())?;
 
     writer
         .write_u32::<NetworkEndian>(bytes.len() as u32 + 4)
-        .unwrap();
+        .map_err(|_| ())?;
 
-    writer.write_all(&bytes).unwrap();
+    if writer.write_all(&bytes).is_err() {
+        Err(())
+    } else {
+        Ok(())
+    }
 }
-pub fn encode<E: Serialize>(e: E) -> Vec<u8> {
+
+pub fn encode<E: Serialize>(e: E) -> Result<Vec<u8>, ()> {
     let mut buffer = Vec::new();
-    encode_into(e, &mut buffer);
-    buffer
+    encode_into(e, &mut buffer)?;
+    Ok(buffer)
 }

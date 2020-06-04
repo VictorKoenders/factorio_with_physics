@@ -20,16 +20,27 @@ impl Default for Server {
 }
 
 impl Server {
-    pub fn connection_status(&self) -> ConnectionStatus {
+    pub fn status(&self) -> ConnectionStatus {
         self.shared.read().status
     }
     pub fn incoming(&mut self) -> Vec<ServerToClient> {
-        std::mem::replace(&mut self.shared.write().incoming, Vec::new())
+        if self.shared.read().incoming.is_empty() {
+            Vec::new()
+        } else {
+            std::mem::replace(&mut self.shared.write().incoming, Vec::new())
+        }
     }
 
     pub fn send(&mut self, message: impl Into<ClientToServer>) {
-        if let Some(stream) = self.shared.write().stream.as_mut() {
-            shared::encode_into(message.into(), stream);
+        let mut shared = self.shared.write();
+        if let Some(stream) = shared.stream.as_mut() {
+            if let Err(e) = shared::encode_into(message.into(), stream) {
+                eprintln!("Could not send to server: {:?}", e);
+                shared.clear_stream();
+            }
+        } else {
+            eprintln!("Tried to write to server, but the stream is not connected (shared.stream == None)");
         }
     }
 }
+

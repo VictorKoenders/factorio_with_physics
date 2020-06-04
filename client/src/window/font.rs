@@ -48,9 +48,16 @@ impl<T: Hash + Eq> Font<T> {
     where
         T: Clone,
     {
-        let fonts = &self.fonts;
-        let texture_creator = &self.texture_creator;
-        let text_cache = &mut self.text_cache;
+        // let fonts = &self.fonts;
+        // let texture_creator = &self.texture_creator;
+        // let text_cache = &mut self.text_cache; // <-- error occurred here
+
+        let Font {
+            fonts,
+            texture_creator,
+            text_cache, // <-- this is fine
+            ..
+        } = self;
 
         // TODO: only use .clone() and .to_owned() when the entry does not exist
         // We'll probably need to switch to a wrapper struct for the key and implementing Hash on that

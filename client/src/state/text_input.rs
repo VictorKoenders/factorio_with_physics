@@ -36,6 +36,13 @@ impl TextInput {
         }
     }
 
+    pub fn with_value(self, value: impl Into<String>) -> Self {
+        Self {
+            value: value.into(),
+            ..self
+        }
+    }
+
     pub fn is_clicked(&self, click_position: (i32, i32)) -> bool {
         let top_left = (self.rect.0, self.rect.1);
         let bottom_right = (

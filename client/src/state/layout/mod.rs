@@ -18,13 +18,7 @@ pub trait Layout {
 
     fn enter_pressed(&mut self, _window: &Window, _server: &mut Server) {}
 
-    fn click(&mut self, (x, y): (i32, i32), window: &Window) {
-        let clicked_input = self.inputs().iter().position(|i| i.is_clicked((x, y)));
-        if let Some(clicked_input) = clicked_input {
-            self.blur_all(window);
-            self.inputs_mut()[clicked_input].on_focus(window);
-        }
-    }
+    fn click(&mut self, position: (i32, i32), window: &Window, _server: &mut Server);
 
     fn text_input(&mut self, text: String) {
         for input in self.inputs_mut() {
@@ -55,5 +49,13 @@ pub trait Layout {
             inputs[current_index].on_blur(window);
         }
         inputs[next_index].on_focus(window);
+    }
+}
+
+pub fn layout_click_base(layout: &mut dyn Layout, (x, y): (i32, i32), window: &Window) {
+    let clicked_input = layout.inputs().iter().position(|i| i.is_clicked((x, y)));
+    if let Some(clicked_input) = clicked_input {
+        layout.blur_all(window);
+        layout.inputs_mut()[clicked_input].on_focus(window);
     }
 }

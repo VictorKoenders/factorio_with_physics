@@ -3,7 +3,7 @@ mod state;
 mod window;
 
 use server::Server;
-use shared::ServerToClient;
+use shared::{ServerToClient, to_client::LoginResult};
 use state::State;
 use std::time::Instant;
 use window::{Color, Event, Window};
@@ -32,18 +32,26 @@ fn main() {
                     state.layout.backspace_pressed();
                 }
                 Event::Click { x, y } => {
-                    state.layout.click((x, y), &window);
+                    state.layout.click((x, y), &window, &mut server);
                 }
                 Event::TextInput { text } => {
                     state.layout.text_input(text);
+                }
+                Event::MouseMove { x, y } => {
+                    state.set_last_mouse_position((x, y));
                 }
             }
         }
         for ev in server.incoming() {
             match ev {
-                ServerToClient::LoginResult(result) => {
-                    println!("Login result: {:?}", result);
+                ServerToClient::LoginResult(LoginResult::Success { player_info }) => {
+                    state.set_player_info(&mut server, player_info);
                 }
+                ServerToClient::LoginResult(LoginResult::Failed) => {
+                    println!("Login failed");
+                }
+                ServerToClient::GalaxyList(galaxies) => state.set_galaxies(galaxies),
+                ServerToClient::SolarSystemList(systems) => state.set_solar_systems(systems),
             }
         }
 

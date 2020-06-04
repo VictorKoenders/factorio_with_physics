@@ -1,6 +1,10 @@
+use crate::GalaxyId;
+
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub enum ClientToServer {
     Login(Login),
+    RequestGalaxyList,
+    RequestSolarSystemList { galaxy_id: GalaxyId },
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]

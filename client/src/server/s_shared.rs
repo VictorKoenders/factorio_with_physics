@@ -40,3 +40,12 @@ pub enum ConnectionStatus {
     Connecting,
     Disconnected,
 }
+
+impl ConnectionStatus {
+    pub fn is_connected(self) -> bool {
+        match self {
+            ConnectionStatus::Connected => true,
+            _ => false,
+        }
+    }
+}

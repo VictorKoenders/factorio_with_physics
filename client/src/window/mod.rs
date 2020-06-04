@@ -7,6 +7,7 @@ use sdl2::{
     render::WindowCanvas,
     EventPump,
 };
+use std::collections::HashMap;
 
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 pub enum FontType {
@@ -96,10 +97,31 @@ impl Window {
     */
 
     pub fn ui_label(&mut self, color: Color, text: &str, x: i32, y: i32) {
+        self.ui_label_positioned(
+            color,
+            text,
+            x,
+            y,
+            HorizontalOffset::Left,
+            VerticalOffset::Top,
+        );
+    }
+
+    pub fn ui_label_positioned(
+        &mut self,
+        color: Color,
+        text: &str,
+        x: i32,
+        y: i32,
+        horizontal_offset: HorizontalOffset,
+        vertical_offset: VerticalOffset,
+    ) {
         if text.is_empty() {
             return;
         }
         let texture = self.font.render(FontType::Roboto, 16, text, color);
+        let x = horizontal_offset.calculate(x, texture.width());
+        let y = vertical_offset.calculate(y, texture.height());
         self.canvas
             .copy(
                 &texture.texture,
@@ -131,6 +153,40 @@ impl Window {
     pub fn start_text_input(&self, rect: (i32, i32, u32, u32)) {
         self.text_input.start();
         self.text_input.set_rect(rect.into());
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
+pub enum HorizontalOffset {
+    Left,
+    Center,
+    Right,
+}
+
+impl HorizontalOffset {
+    fn calculate(self, x: i32, width: u32) -> i32 {
+        match self {
+            HorizontalOffset::Left => x,
+            HorizontalOffset::Center => x - (width as i32 / 2),
+            HorizontalOffset::Right => x - width as i32,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
+pub enum VerticalOffset {
+    Top,
+    Center,
+    Bottom,
+}
+
+impl VerticalOffset {
+    fn calculate(self, y: i32, height: u32) -> i32 {
+        match self {
+            VerticalOffset::Top => y,
+            VerticalOffset::Center => y - (height as i32 / 2),
+            VerticalOffset::Bottom => y - height as i32,
+        }
     }
 }
 
@@ -170,8 +226,10 @@ impl Color {
     }
 }
 
+#[derive(Clone)]
 pub enum Event {
     CloseRequested,
+    MouseMove { x: i32, y: i32 },
     Click { x: i32, y: i32 },
     Tab,
     Enter,
@@ -182,23 +240,18 @@ pub enum Event {
 impl Event {
     pub(super) fn try_from_sdl_event(e: SdlEvent) -> Option<Self> {
         match e {
-            SdlEvent::Quit { .. }
-            | SdlEvent::KeyDown {
-                keycode: Some(Keycode::Escape),
-                ..
-            } => Some(Event::CloseRequested),
+            SdlEvent::Quit { .. } => Some(Event::CloseRequested),
             SdlEvent::KeyDown {
-                keycode: Some(Keycode::Tab),
+                keycode: Some(code),
                 ..
-            } => Some(Event::Tab),
-            SdlEvent::KeyDown {
-                keycode: Some(Keycode::Return),
-                ..
-            } => Some(Event::Enter),
-            SdlEvent::KeyDown {
-                keycode: Some(Keycode::Backspace),
-                ..
-            } => Some(Event::Backspace),
+            } => {
+                if let Some(ev) = KEY_MAP.get(&code) {
+                    Some(ev.clone())
+                } else {
+                    None
+                }
+            }
+            SdlEvent::MouseMotion { x, y, .. } => Some(Event::MouseMove { x, y }),
             SdlEvent::TextInput { text, .. } => Some(Event::TextInput { text }),
             SdlEvent::TextEditing {
                 text,
@@ -213,4 +266,16 @@ impl Event {
             _ => None,
         }
     }
+}
+
+lazy_static::lazy_static! {
+    static ref KEY_MAP: HashMap<Keycode, Event> = {
+        let mut map =  HashMap ::new();
+        map.insert(Keycode::Escape,  Event::CloseRequested);
+        map.insert(Keycode::Tab,  Event::Tab);
+        map.insert(Keycode::Return,  Event::Enter);
+        map.insert(Keycode::KpEnter,  Event::Enter);
+        map.insert(Keycode::Backspace, Event::Backspace);
+        map
+    };
 }

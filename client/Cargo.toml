@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 shared = { path = "../shared" }
 parking_lot = "0.10"
+lazy_static = "1.4"
 
 [dependencies.sdl2]
 version = "0.32"
