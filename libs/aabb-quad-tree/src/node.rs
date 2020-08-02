@@ -3,7 +3,7 @@ use smallvec::SmallVec;
 
 pub enum Node<T: AABB> {
     End(SmallVec<[T; 4]>),
-    Nested([Option<Box<Node<T>>>; 4]),
+    Nested([Box<Node<T>>; 4]),
 }
 
 impl<T: AABB> Default for Node<T> {
@@ -32,13 +32,7 @@ impl<T: AABB> Node<T> {
             }
             Node::Nested(slice) => {
                 let (node_bounds, pos) = node_bounds.get_subsection_for_bounds(&val_bounds);
-                if slice[pos].is_none() {
-                    slice[pos] = Some(Box::default());
-                }
-                slice[pos]
-                    .as_mut()
-                    .unwrap()
-                    .insert(val, val_bounds, node_bounds);
+                slice[pos].insert(val, val_bounds, node_bounds);
             }
         }
     }
@@ -49,14 +43,11 @@ impl<T: AABB> Node<T> {
             }
             Node::Nested(slice) => {
                 let (node_bounds, pos) = node_bounds.get_subsection_for_bounds(&val_bounds);
-                if let Some(sub) = &mut slice[pos] {
-                    sub.remove(val, val_bounds, node_bounds);
-                    if sub.is_empty() {
-                        slice[pos] = None;
-                        if slice.iter().all(Option::is_none) {
-                            *self = Node::End(SmallVec::new());
-                        }
-                    }
+                let sub = &mut slice[pos];
+                sub.remove(val, val_bounds, node_bounds);
+
+                if slice.iter().all(|s| s.is_empty()) {
+                    *self = Node::End(SmallVec::new());
                 }
             }
         }
@@ -65,20 +56,12 @@ impl<T: AABB> Node<T> {
     fn is_empty(&self) -> bool {
         match self {
             Node::End(slice) => slice.is_empty(),
-            Node::Nested(slice) => slice.iter().all(Option::is_none),
-        }
-    }
-
-    fn assert_all_empty(&self) {
-        match self {
-            Node::End(_) => assert!(false),
-            Node::Nested(slice) => assert!(slice.iter().all(|s| s.is_none())),
+            Node::Nested(slice) => slice.iter().all(|s| s.is_empty()),
         }
     }
 
     fn to_nested_with_new_value(&mut self, val: T, val_bounds: Bounds, node_bounds: Bounds) {
-        let values = std::mem::replace(self, Node::Nested([None, None, None, None]));
-        self.assert_all_empty();
+        let values = std::mem::replace(self, Node::Nested(Default::default()));
         let values = match values {
             Node::End(v) => v,
             Node::Nested(_) => {

@@ -51,10 +51,6 @@ fn get_bounds_recursive<T: AABB>(node: &Node<T>, bounds: Bounds, rects: &mut Vec
     match node {
         Node::Nested(children) => {
             for (i, child) in children.iter().enumerate() {
-                let child = match child {
-                    Some(c) => c,
-                    None => continue,
-                };
                 let bounds = bounds.section_by_index(i);
                 get_bounds_recursive(child, bounds, rects);
             }
