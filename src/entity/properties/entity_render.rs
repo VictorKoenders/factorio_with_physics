@@ -34,7 +34,7 @@ impl EntityRender {
                 let chunk = Chunk::new(x, y);
                 let query =
                     <(Read<Position>, Read<EntityRender>)>::query().filter(tag_value(&chunk));
-                for (position, render) in query.iter_immutable(world) {
+                for (position, render) in query.iter(world) {
                     cb(&*position, &*render);
                 }
             }

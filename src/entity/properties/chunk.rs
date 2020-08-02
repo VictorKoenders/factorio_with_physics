@@ -51,7 +51,7 @@ impl Chunk {
             for y in min.y..=max.y {
                 let chunk = Chunk { x, y };
                 let query = <Read<Position>>::query().filter(tag_value(&chunk));
-                for (entity, position) in query.iter_entities_immutable(world) {
+                for (entity, position) in query.iter_entities(world) {
                     cb(position.as_ref(), entity);
                     entity_count += 1;
                 }

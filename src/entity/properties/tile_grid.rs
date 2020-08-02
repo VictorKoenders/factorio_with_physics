@@ -34,7 +34,7 @@ impl TileGrid {
                 let chunk = Chunk::new(x, y);
                 let query =
                     <Read<TileGrid>>::query().filter(tag_value(&chunk) & tag::<TileGridTag>());
-                for grid in query.iter_immutable(world) {
+                for grid in query.iter(world) {
                     cb(chunk.clone(), &*grid);
                 }
             }
