@@ -1,0 +1,16 @@
+[package]
+authors = ["Trangar <victor.koenders@gmail.com>"]
+edition = "2018"
+name = "factorio_with_physics"
+version = "0.1.0"
+
+[dependencies]
+tetra = "0.4"
+legion = "0.2"
+rand = "0.7"
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+lto = true
