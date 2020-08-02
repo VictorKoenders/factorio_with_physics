@@ -1,12 +1,14 @@
 use crate::{Bounds, AABB};
+use smallvec::SmallVec;
+
 pub enum Node<T: AABB> {
-    End([Option<T>; 4]),
+    End(SmallVec<[T; 4]>),
     Nested([Option<Box<Node<T>>>; 4]),
 }
 
 impl<T: AABB> Default for Node<T> {
     fn default() -> Self {
-        Self::End([None, None, None, None])
+        Self::End(SmallVec::default())
     }
 }
 
@@ -14,16 +16,14 @@ impl<T: AABB> Node<T> {
     pub fn insert(&mut self, val: T, val_bounds: Bounds, node_bounds: Bounds) {
         match self {
             Node::End(slice) => {
-                if let Some(empty_index) = slice.iter().position(Option::is_none) {
-                    slice[empty_index] = Some(val);
+                if slice.len() < slice.inline_size() {
+                    slice.push(val);
                     return;
                 } else {
                     // If we insert 4 nodes with the exact same midpoint, the quad tree will turn into an infinite loop and overflow it's stack
                     // We'll check here if that happens and panic otherwise
                     assert!(
-                        slice
-                            .iter()
-                            .all(|s| s.as_ref().unwrap().bounds().mid() != val_bounds.mid()),
+                        slice.iter().all(|s| s.bounds().mid() != val_bounds.mid()),
                         "Tried inserting too many points with the same midpoint"
                     );
                     self.to_nested_with_new_value(val, val_bounds, node_bounds);
@@ -45,14 +45,7 @@ impl<T: AABB> Node<T> {
     pub fn remove(&mut self, val: &T, val_bounds: Bounds, node_bounds: Bounds) {
         match self {
             Node::End(slice) => {
-                for s in slice.iter_mut() {
-                    if let Some(v) = s {
-                        if v.is_eq(val) {
-                            *s = None;
-                            return;
-                        }
-                    }
-                }
+                slice.retain(|s| !s.is_eq(val));
             }
             Node::Nested(slice) => {
                 let (node_bounds, pos) = node_bounds.get_subsection_for_bounds(&val_bounds);
@@ -61,7 +54,7 @@ impl<T: AABB> Node<T> {
                     if sub.is_empty() {
                         slice[pos] = None;
                         if slice.iter().all(Option::is_none) {
-                            *self = Node::End([None, None, None, None]);
+                            *self = Node::End(SmallVec::new());
                         }
                     }
                 }
@@ -71,7 +64,7 @@ impl<T: AABB> Node<T> {
 
     fn is_empty(&self) -> bool {
         match self {
-            Node::End(slice) => slice.iter().all(Option::is_none),
+            Node::End(slice) => slice.is_empty(),
             Node::Nested(slice) => slice.iter().all(Option::is_none),
         }
     }
@@ -95,7 +88,7 @@ impl<T: AABB> Node<T> {
         // BlockedTODO: https://github.com/rust-lang/rust/issues/25725
         // Change this to .into_iter() once that's available
 
-        for val in values.iter().cloned().filter_map(|v: Option<T>| v) {
+        for val in values {
             let val_bounds = val.bounds();
             self.insert(val, val_bounds, node_bounds.clone());
         }
