@@ -42,7 +42,33 @@ fn batch_insert(c: &mut Criterion) {
     });
 }
 
-fn batch_insert_and_remove(c: &mut Criterion) {}
+fn batch_insert_and_remove(c: &mut Criterion) {
+    let bounds = Bounds {
+        left: 0.0,
+        top: 0.0,
+        right: 100.0,
+        bottom: 100.0,
+    };
+    let mut nodes = Vec::new();
+    for id in 0..1_000 {
+        nodes.push(Point {
+            id,
+            bounds: random_bounds(&bounds),
+        });
+    }
+
+    c.bench_function("batch_insert_and_remove", |b| {
+        b.iter(|| {
+            let mut tree = AABBQuadTree::new(bounds);
+            for node in nodes.iter().cloned() {
+                tree.insert(black_box(node));
+            }
+            for node in nodes.iter().cloned() {
+                tree.remove(black_box(&node));
+            }
+        })
+    });
+}
 
 criterion_group!(benches, batch_insert, batch_insert_and_remove);
 criterion_main!(benches);
