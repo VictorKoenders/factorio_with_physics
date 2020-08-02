@@ -41,17 +41,6 @@ impl<T: AABB> AABBQuadTree<T> {
                 node_bounds,
             );
         }
-        /* TODO: Bulk insert
-        let node = val_bounds
-            .corners()
-            .iter()
-            .map(|corner| NodeInner {
-                id: id.clone(),
-                coord: *corner,
-            })
-            .collect::<Vec<_>>();
-
-        self.root.insert(&node, node_bounds);*/
     }
 
     pub fn remove(&mut self, t: &T) {

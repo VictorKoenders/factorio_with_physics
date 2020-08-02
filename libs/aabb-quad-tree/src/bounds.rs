@@ -72,22 +72,38 @@ impl Bounds {
         self.bottom_right.y - self.top_left.y
     }
 
-    pub(crate) fn get_subsection(&self, coord: Coord) -> (Bounds, usize) {
+    pub(crate) fn get_subsection_index(&self, coord: Coord) -> usize {
         let self_mid = self.mid();
 
         if coord.x < self_mid.x {
             if coord.y < self_mid.y {
-                (self.top_left(), INDEX_TOP_LEFT)
+                INDEX_TOP_LEFT
             } else {
-                (self.bottom_left(), INDEX_BOTTOM_LEFT)
+                INDEX_BOTTOM_LEFT
             }
         } else {
             if coord.y < self_mid.y {
-                (self.top_right(), INDEX_TOP_RIGHT)
+                INDEX_TOP_RIGHT
             } else {
-                (self.bottom_right(), INDEX_BOTTOM_RIGHT)
+                INDEX_BOTTOM_RIGHT
             }
         }
+    }
+
+    pub(crate) fn get_subsection_by_index(&self, index: usize) -> Bounds {
+        match index {
+            INDEX_TOP_LEFT => self.top_left(),
+            INDEX_TOP_RIGHT => self.top_right(),
+            INDEX_BOTTOM_LEFT => self.bottom_left(),
+            INDEX_BOTTOM_RIGHT => self.bottom_right(),
+            _ => unreachable!(),
+        }
+    }
+
+    pub(crate) fn get_subsection(&self, coord: Coord) -> (Bounds, usize) {
+        let idx = self.get_subsection_index(coord);
+        let bounds = self.get_subsection_by_index(idx);
+        (bounds, idx)
     }
 
     pub(crate) fn corners(&self) -> [Coord; 4] {
