@@ -4,11 +4,53 @@ pub(crate) const INDEX_BOTTOM_LEFT: usize = 2;
 pub(crate) const INDEX_BOTTOM_RIGHT: usize = 3;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Coord {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Coord {
+    pub fn broadcast(n: f32) -> Self {
+        Self { x: n, y: n }
+    }
+}
+
+impl std::ops::Add for Coord {
+    type Output = Coord;
+
+    fn add(self, other: Coord) -> Coord {
+        Coord {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+impl std::ops::Sub for Coord {
+    type Output = Coord;
+
+    fn sub(self, other: Coord) -> Coord {
+        Coord {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
+impl std::ops::Div<f32> for Coord {
+    type Output = Coord;
+
+    fn div(self, factor: f32) -> Coord {
+        Coord {
+            x: self.x / factor,
+            y: self.y / factor,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Bounds {
-    pub left: f32,
-    pub right: f32,
-    pub top: f32,
-    pub bottom: f32,
+    pub top_left: Coord,
+    pub bottom_right: Coord,
 }
 
 impl Bounds {
@@ -22,71 +64,93 @@ impl Bounds {
         }
     }
 
-    pub(crate) fn get_subsection_for_bounds(&self, bounds: &Bounds) -> (Bounds, usize) {
-        let self_mid = self.mid();
-        let bounds_mid = bounds.mid();
+    pub fn width(&self) -> f32 {
+        self.bottom_right.x - self.top_left.x
+    }
 
-        let (sub, index) = if bounds_mid.0 < self_mid.0 {
-            if bounds_mid.1 < self_mid.1 {
+    pub fn height(&self) -> f32 {
+        self.bottom_right.y - self.top_left.y
+    }
+
+    pub(crate) fn get_subsection(&self, coord: Coord) -> (Bounds, usize) {
+        let self_mid = self.mid();
+
+        if coord.x < self_mid.x {
+            if coord.y < self_mid.y {
                 (self.top_left(), INDEX_TOP_LEFT)
             } else {
                 (self.bottom_left(), INDEX_BOTTOM_LEFT)
             }
         } else {
-            if bounds_mid.1 < self_mid.1 {
+            if coord.y < self_mid.y {
                 (self.top_right(), INDEX_TOP_RIGHT)
             } else {
                 (self.bottom_right(), INDEX_BOTTOM_RIGHT)
             }
-        };
-
-        (sub, index)
+        }
     }
 
-    pub(crate) fn mid(&self) -> (f32, f32) {
-        (
-            self.left + (self.right - self.left) / 2.0,
-            self.top + (self.bottom - self.top) / 2.0,
-        )
+    pub(crate) fn corners(&self) -> [Coord; 4] {
+        [
+            self.top_left,
+            Coord {
+                // top right
+                x: self.bottom_right.x,
+                y: self.top_left.y,
+            },
+            self.bottom_right,
+            Coord {
+                x: self.top_left.x,
+                y: self.bottom_right.y,
+            },
+        ]
+    }
+
+    pub(crate) fn mid(&self) -> Coord {
+        self.top_left + (self.bottom_right - self.top_left) / 2.0
     }
 
     pub(crate) fn top_left(&self) -> Bounds {
         let mid = self.mid();
         Bounds {
-            left: self.left,
-            right: mid.0,
-            top: self.top,
-            bottom: mid.1,
+            top_left: self.top_left,
+            bottom_right: mid,
         }
     }
 
     pub(crate) fn top_right(&self) -> Bounds {
         let mid = self.mid();
         Bounds {
-            left: mid.0,
-            right: self.right,
-            top: self.top,
-            bottom: mid.1,
+            top_left: Coord {
+                x: mid.x,
+                y: self.top_left.y,
+            },
+            bottom_right: Coord {
+                x: self.bottom_right.x,
+                y: mid.y,
+            },
         }
     }
 
     pub(crate) fn bottom_left(&self) -> Bounds {
         let mid = self.mid();
         Bounds {
-            left: self.left,
-            right: mid.0,
-            top: mid.1,
-            bottom: self.bottom,
+            top_left: Coord {
+                x: self.top_left.x,
+                y: mid.y,
+            },
+            bottom_right: Coord {
+                x: mid.x,
+                y: self.bottom_right.y,
+            },
         }
     }
 
     pub(crate) fn bottom_right(&self) -> Bounds {
         let mid = self.mid();
         Bounds {
-            left: mid.0,
-            right: self.right,
-            top: mid.1,
-            bottom: self.bottom,
+            top_left: mid,
+            bottom_right: self.bottom_right,
         }
     }
 }
@@ -94,46 +158,61 @@ impl Bounds {
 #[test]
 fn validate_splits() {
     let bounds = Bounds {
-        top: 0.0,
-        bottom: 100.0,
-        left: 0.0,
-        right: 100.,
+        top_left: Coord { x: 0.0, y: 0.0 },
+        bottom_right: Coord { x: 100.0, y: 100.0 },
     };
 
     assert_eq!(
         bounds.top_left(),
         Bounds {
-            top: 0.0,
-            bottom: 50.0,
-            left: 0.0,
-            right: 50.0
+            top_left: Coord { x: 0.0, y: 0.0 },
+            bottom_right: Coord { x: 50., y: 50. }
         }
     );
     assert_eq!(
         bounds.bottom_left(),
         Bounds {
-            top: 50.0,
-            bottom: 100.0,
-            left: 0.0,
-            right: 50.0
+            top_left: Coord { x: 0.0, y: 50.0 },
+            bottom_right: Coord { x: 50., y: 100. }
         }
     );
     assert_eq!(
         bounds.top_right(),
         Bounds {
-            top: 0.0,
-            bottom: 50.0,
-            left: 50.0,
-            right: 100.0
+            top_left: Coord { x: 50.0, y: 0.0 },
+            bottom_right: Coord { x: 100., y: 50. }
         }
     );
     assert_eq!(
         bounds.bottom_right(),
         Bounds {
-            top: 50.0,
-            bottom: 100.0,
-            left: 50.0,
-            right: 100.0
+            top_left: Coord { x: 50.0, y: 50.0 },
+            bottom_right: Coord { x: 100., y: 100. }
         }
     );
+}
+
+#[test]
+fn sanity_check() {
+    let bounds = Bounds {
+        top_left: Coord { x: 500.0, y: 0.0 },
+        bottom_right: Coord {
+            x: 1000.0,
+            y: 500.0,
+        },
+    };
+    let point = Coord {
+        x: 740.768493,
+        y: 238.742157,
+    };
+
+    let (sub_bounds, idx) = bounds.get_subsection(point);
+    assert_eq!(
+        sub_bounds,
+        Bounds {
+            top_left: Coord { x: 500.0, y: 0.0 },
+            bottom_right: Coord { x: 750.0, y: 250.0 }
+        }
+    );
+    assert_eq!(idx, INDEX_TOP_LEFT);
 }

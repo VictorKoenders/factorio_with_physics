@@ -54,16 +54,21 @@ impl Point {
     }
 }
 impl AABB for Point {
+    type ID = u64;
+    fn id(&self) -> u64 {
+        self.id
+    }
     fn bounds(&self) -> Bounds {
         Bounds {
-            left: self.position.0 - self.size.0,
-            top: self.position.1 - self.size.1,
-            right: self.position.0 + self.size.0,
-            bottom: self.position.1 + self.size.1,
+            top_left: Coord {
+                x: self.position.0 - self.size.0,
+                y: self.position.1 - self.size.1,
+            },
+            bottom_right: Coord {
+                x: self.position.0 + self.size.0,
+                y: self.position.1 + self.size.1,
+            },
         }
-    }
-    fn is_eq(&self, other: &Self) -> bool {
-        self.id == other.id
     }
 }
 
@@ -78,26 +83,43 @@ impl MyGame {
         // Load/create resources here: images, fonts, sounds, etc.
         let mut game = MyGame {
             quadtree: AABBQuadTree::new(Bounds {
-                left: 0.0,
-                top: 0.0,
-                right: window_size.0,
-                bottom: window_size.1,
+                top_left: Coord { x: 0.0, y: 0.0 },
+                bottom_right: Coord {
+                    x: window_size.0,
+                    y: window_size.1,
+                },
             }),
             rectangles: Vec::new(),
             points: Vec::new(),
         };
         game.update_rectangles(ctx);
+        game.update_title(ctx);
         game
+    }
+
+    fn update_title(&mut self, ctx: &mut Context) {
+        let entities = self.quadtree.dbg_entity_count();
+        let points = self.quadtree.dbg_point_count();
+
+        graphics::set_window_title(
+            ctx,
+            &format!(
+                "{} entities, {} points, {} rectangles",
+                entities,
+                points,
+                self.rectangles.len(),
+            ),
+        );
     }
 
     fn update_rectangles(&mut self, ctx: &mut Context) {
         self.rectangles.clear();
         for b in self.quadtree.dbg_rectangles() {
             let rect = graphics::Rect {
-                x: b.left,
-                y: b.top,
-                w: b.right - b.left,
-                h: b.bottom - b.top,
+                x: b.top_left.x,
+                y: b.top_left.y,
+                w: b.width(),
+                h: b.height(),
             };
             let mesh = Mesh::new_rectangle(
                 ctx,
@@ -128,6 +150,7 @@ impl EventHandler for MyGame {
                 self.quadtree.remove(&point);
                 self.points.remove(index);
                 self.update_rectangles(ctx);
+                self.update_title(ctx);
                 return;
             }
         }
@@ -142,6 +165,7 @@ impl EventHandler for MyGame {
         self.points.push((mesh, point.clone()));
         self.quadtree.insert(point);
         self.update_rectangles(ctx);
+        self.update_title(ctx);
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

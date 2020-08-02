@@ -8,21 +8,19 @@ struct Point {
 }
 
 impl AABB for Point {
+    type ID = usize;
+    fn id(&self) -> usize {
+        self.id
+    }
     fn bounds(&self) -> Bounds {
         self.bounds.clone()
-    }
-
-    fn is_eq(&self, other: &Self) -> bool {
-        self.id == other.id
     }
 }
 
 fn batch_insert(c: &mut Criterion) {
     let bounds = Bounds {
-        left: 0.0,
-        top: 0.0,
-        right: 100.0,
-        bottom: 100.0,
+        top_left: Coord { x: 0.0, y: 0.0 },
+        bottom_right: Coord { x: 100.0, y: 100.0 },
     };
     let mut nodes = Vec::new();
     for id in 0..1_000 {
@@ -44,10 +42,8 @@ fn batch_insert(c: &mut Criterion) {
 
 fn batch_insert_and_remove(c: &mut Criterion) {
     let bounds = Bounds {
-        left: 0.0,
-        top: 0.0,
-        right: 100.0,
-        bottom: 100.0,
+        top_left: Coord { x: 0.0, y: 0.0 },
+        bottom_right: Coord { x: 100.0, y: 100.0 },
     };
     let mut nodes = Vec::new();
     for id in 0..1_000 {
@@ -77,24 +73,28 @@ fn random_bounds(bounds: &Bounds) -> Bounds {
     use rand::Rng;
     let mut rng = rand::thread_rng();
     let mut hor_points = (
-        rng.gen_range(bounds.left, bounds.right),
-        rng.gen_range(bounds.left, bounds.right),
+        rng.gen_range(bounds.top_left.x, bounds.bottom_right.x),
+        rng.gen_range(bounds.top_left.x, bounds.bottom_right.x),
     );
     if hor_points.0 > hor_points.1 {
         std::mem::swap(&mut hor_points.0, &mut hor_points.1);
     }
     let mut vert_points = (
-        rng.gen_range(bounds.top, bounds.bottom),
-        rng.gen_range(bounds.top, bounds.bottom),
+        rng.gen_range(bounds.top_left.y, bounds.bottom_right.y),
+        rng.gen_range(bounds.top_left.y, bounds.bottom_right.y),
     );
     if vert_points.0 > vert_points.1 {
         std::mem::swap(&mut vert_points.0, &mut vert_points.1);
     }
 
     Bounds {
-        top: vert_points.0,
-        left: hor_points.0,
-        right: hor_points.1,
-        bottom: vert_points.1,
+        top_left: Coord {
+            x: hor_points.0,
+            y: vert_points.0,
+        },
+        bottom_right: Coord {
+            x: hor_points.1,
+            y: vert_points.1,
+        },
     }
 }
