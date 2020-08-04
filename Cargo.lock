@@ -357,9 +357,9 @@ dependencies = [
 
 [[package]]
 name = "gl_generator"
-version = "0.13.1"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca98bbde17256e02d17336a6bdb5a50f7d0ccacee502e191d3e3d0ec2f96f84a"
+checksum = "1a95dfc23a2b4a9a2f5ab41d194f8bfda3cabec42af4e39f08c339eb2a0c124d"
 dependencies = [
  "khronos_api",
  "log",
@@ -374,9 +374,9 @@ checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 
 [[package]]
 name = "glow"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31aed196700daf16e1241d819ff4a4855a78ee0cddb051948d50b9213deec82f"
+checksum = "3a86c1086850aab0767f4ef01df03c7bdb1cefe18af303571ec144115b733b7b"
 dependencies = [
  "gl_generator",
  "js-sys",
@@ -928,9 +928,9 @@ dependencies = [
 
 [[package]]
 name = "slotmap"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "759fd553261805f128e2900bf69ab3d034260bc338caf7f0ee54dbf035c85acd"
+checksum = "c46a3482db8f247956e464d783693ece164ca056e6e67563ee5505bdb86452cd"
 
 [[package]]
 name = "static_assertions"
@@ -969,11 +969,12 @@ dependencies = [
 
 [[package]]
 name = "tetra"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a6a48412f349d33d60ffddcc6eecfc143f0088e652499696ea39bd967b63ced"
+checksum = "009faaef7deb6e9517dd682ff145686fb6764d4edc1818cd56a3fa930d84ec73"
 dependencies = [
  "ab_glyph",
+ "bytemuck",
  "glow",
  "hashbrown",
  "image",
