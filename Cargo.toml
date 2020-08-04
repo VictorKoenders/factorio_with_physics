@@ -5,11 +5,14 @@ name = "factorio_with_physics"
 version = "0.1.0"
 
 [dependencies]
-tetra = "0.4"
 rand = "0.7"
 vek = "0.12"
 bitvec = "0.17"
 noisy_float = "0.1"
+
+[dependencies.tetra]
+version = "0.4"
+features = ["sdl2_bundled", "sdl2_static_link"]
 
 [profile.dev.package."*"]
 opt-level = 2
