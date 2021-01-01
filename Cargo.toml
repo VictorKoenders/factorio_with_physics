@@ -6,7 +6,7 @@ version = "0.1.0"
 
 [dependencies]
 rand = "0.7"
-vek = "0.12"
+vek = "0.13"
 bitvec = "0.17"
 noisy_float = "0.1"
 
