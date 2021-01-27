@@ -11,7 +11,7 @@ bitvec = "0.17"
 noisy_float = "0.1"
 
 [dependencies.tetra]
-version = "0.4"
+version = "0.5"
 features = ["sdl2_bundled", "sdl2_static_link"]
 
 [profile.dev.package."*"]
