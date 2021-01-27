@@ -5,7 +5,7 @@ name = "factorio_with_physics"
 version = "0.1.0"
 
 [dependencies]
-rand = "0.7"
+rand = "0.8"
 vek = "0.12"
 bitvec = "0.17"
 noisy_float = "0.1"
