@@ -7,7 +7,7 @@ version = "0.1.0"
 [dependencies]
 rand = "0.7"
 vek = "0.12"
-bitvec = "0.17"
+bitvec = "0.21"
 noisy_float = "0.1"
 
 [dependencies.tetra]
