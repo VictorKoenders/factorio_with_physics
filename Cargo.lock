@@ -576,9 +576,9 @@ dependencies = [
 
 [[package]]
 name = "noisy_float"
-version = "0.1.12"
+version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1b3e1bd47a70dc23b4b1d4c7dabe09135cf86a5eb2ad5a60c853cb69c64d32e"
+checksum = "3deb89f8062c0dce4c805a987daff07f92e17c560f7c3ed631282555af902258"
 dependencies = [
  "num-traits",
 ]
